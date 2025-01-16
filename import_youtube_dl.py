@@ -15,7 +15,7 @@ raiz.title("Youtube to mp3 converter by Marcos Jabalquinto. 2023. V.1.1")
 # Especificamos que se puede modificar el tamaño de la ventana. Ancho x alto. Es booleano. 0 = no. 1 = sí.
 raiz.resizable(0, 0)
 # También podemos especificar el tamaño de la ventana.
-raiz.geometry("640x480")
+raiz.geometry("640x520")
 # Color de fondo.
 raiz.config(bg="black")
 
@@ -30,7 +30,7 @@ image_path = os.path.join(base_path, 'fondo.png')
 image = PhotoImage(file=image_path)
 canvas = Canvas(raiz, width=image.width(), height=image.height())
 canvas.create_image(0, 0, image=image, anchor=NW)
-canvas.place(x=0, y=0)
+canvas.place(x=0, y=50)
 
 def download_video(url, progressbar):
     if os.name == 'nt':  # Windows
