@@ -17,7 +17,7 @@ raiz.resizable(0, 0)
 # También podemos especificar el tamaño de la ventana.
 raiz.geometry("640x480")
 # Color de fondo.
-#raiz.config(bg="black")
+raiz.config(bg="black")
 
 # Verificar el entorno de ejecución para cargar recursos.
 if getattr(sys, 'frozen', False):
@@ -30,7 +30,7 @@ image_path = os.path.join(base_path, 'fondo.png')
 image = PhotoImage(file=image_path)
 canvas = Canvas(raiz, width=image.width(), height=image.height())
 canvas.create_image(0, 0, image=image, anchor=NW)
-canvas.place(x=200, y=100)
+canvas.place(x=0, y=0)
 
 def download_video(url, progressbar):
     if os.name == 'nt':  # Windows
