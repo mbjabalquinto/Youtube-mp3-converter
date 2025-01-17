@@ -40,10 +40,6 @@ def on_download_progress(stream, chunk, bytes_remaining):
     # Actualizar la barra de progreso en el hilo principal
     raiz.after(0, update_download_progress, progress_percentage)
 
-def update_download_progress(progress_percentage):
-    progressbar_download['value'] = progress_percentage
-    raiz.update_idletasks()  # Actualiza la interfaz para reflejar el progreso
-
 def download_video(url, progressbar_conversion, progressbar_download):
     if os.name == 'nt':  # Windows
         user_documents = os.path.join(os.path.expanduser("~"), "Documents")
@@ -60,7 +56,9 @@ def download_video(url, progressbar_conversion, progressbar_download):
         video_title = video_title.replace(" ", "_")
         print(f"Descargando: {video_title}")
 
+        # Aquí usamos la opción de descarga de mayor resolución disponible
         stream = video.streams.get_highest_resolution()
+        # Inicia la descarga
         stream.download(video_path, filename=video_title + ".mp4")
 
         thread = Thread(target=convert_to_mp3, args=(video_path, video_title + ".mp4", progressbar_conversion))
@@ -98,6 +96,9 @@ def update_progressbar(progressbar, remaining_steps):
     elif remaining_steps == 0:
         on_conversion_complete()
 
+def update_download_progress(progress_percentage):
+    progressbar_download["value"] = progress_percentage
+
 def on_conversion_complete():
     messagebox.showinfo("Conversión completada", "Tu canción está lista!!")
     if os.name != 'nt':
@@ -105,32 +106,46 @@ def on_conversion_complete():
     else:
         os.system(f'start explorer "{os.path.realpath(os.path.join(os.path.expanduser("~"), "Documents", "videoconverter"))}"')
 
+def clear_url_field():
+    url.delete(0, END)
+
+def limit_url_input(P):
+    # Limita la longitud de la URL a 100 caracteres
+    if len(P) > 100:
+        return False
+    return True
+
 # Elementos de la interfaz
 font_style_label = ("Helvetica", 11, "bold")  # Tipo de fuente: Helvetica, tamaño 14, negrita
 url_label = Label(raiz, text="URL de youtube:", fg="white", bg="black", font=font_style_label)
 url_label.place(x=20, y=10)  # Etiqueta de URL en la parte superior
-url = Entry(raiz, width=60)
+
+# Creamos el validador de entrada para el campo de URL
+vcmd = (raiz.register(limit_url_input), '%P')
+
+url = Entry(raiz, width=60, validate="key", validatecommand=vcmd)
 url.place(x=150, y=10)  # Campo de entrada de URL justo debajo de la etiqueta
 
-# Etiqueta y barra de progreso para la descarga
-bar_label_download = Label(raiz, text="Descarga:", fg="white", bg="black", font=font_style_label)
-bar_label_download.place(x=20, y=80)  # Etiqueta de descarga
+bar_label = Label(raiz, text="Descarga:", fg="white", bg="black", font=font_style_label)
+bar_label.place(x=20, y=40)  # Etiqueta de barra de descarga
 
 progressbar_download = ttk.Progressbar(raiz, orient='horizontal', length=200, mode='determinate', maximum=100)
-progressbar_download.place(x=150, y=80)  # Barra de progreso de descarga
+progressbar_download.place(x=150, y=40)  # Barra de descarga
 
-# Etiqueta y barra de progreso para la conversión
 bar_label_conversion = Label(raiz, text="Conversión:", fg="white", bg="black", font=font_style_label)
-bar_label_conversion.place(x=20, y=120)  # Etiqueta de conversión
+bar_label_conversion.place(x=20, y=80)  # Etiqueta de barra de conversión
 
-progressbar = ttk.Progressbar(raiz, orient='horizontal', length=200, mode='determinate', maximum=100)
-progressbar.place(x=150, y=120)  # Barra de progreso de conversión
+progressbar_conversion = ttk.Progressbar(raiz, orient='horizontal', length=200, mode='determinate', maximum=100)
+progressbar_conversion.place(x=150, y=80)  # Barra de conversión
 
 # Botones
 font_style = ("verdana", 20, "bold")  # Tipo de fuente: Arial, tamaño 14, negrita
 font_style_salir = ("Tahoma", 11, "bold")  # Tipo de fuente: Arial, tamaño 14, negrita
-convert_button = Button(raiz, text="Convertir", height=1, width=12, font=font_style, command=lambda: download_video(url.get(), progressbar, progressbar_download))
+convert_button = Button(raiz, text="Convertir", height=1, width=12, font=font_style, command=lambda: download_video(url.get(), progressbar_conversion, progressbar_download))
 convert_button.place(x=200, y=380)  # Botón "Convertir" debajo de la barra de progreso
+
+clear_button = Button(raiz, text="Limpiar URL", height=1, width=12, font=font_style_salir, command=clear_url_field)
+clear_button.place(x=200, y=350)  # Botón "Limpiar URL" justo encima del botón "Salir"
 
 salir_button = Button(raiz, text="Salir", font=font_style_salir, command=raiz.quit)
 salir_button.place(x=550, y=400)  # Botón "Salir" al lado del botón "Convertir"
